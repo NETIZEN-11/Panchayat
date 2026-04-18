@@ -1,0 +1,10 @@
+node_modules/
+.expo/
+npm-debug.log
+yarn-error.log
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db

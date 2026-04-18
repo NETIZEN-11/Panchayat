@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Smart Panchayat",
+    "slug": "smart-panchayat",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "platforms": ["android", "ios"],
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#3498db"
+    },
+    "android": {
+      "package": "com.smartpanchayat.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#3498db"
+      }
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.smartpanchayat.app"
+    },
+    "assetBundlePatterns": ["**/*"]
+  }
+}
