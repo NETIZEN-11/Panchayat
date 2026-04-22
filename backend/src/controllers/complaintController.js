@@ -1,6 +1,6 @@
 const Complaint = require('../models/Complaint');
 const User = require('../models/User');
-const { sendNotification } = require('../utils/notifications');
+const { sendNotification, sendToVillage } = require('../utils/notifications');
 
 // Helper: normalize roles (support legacy user/admin)
 const isCitizen = (role) => ['citizen', 'user'].includes(role);
@@ -50,6 +50,16 @@ exports.createComplaint = async (req, res) => {
     }
 
     const complaint = await Complaint.create(complaintData);
+
+    // Notify the sarpanch about new complaint in their village
+    const sarpanchVillage = complaintData.village;
+    await sendToVillage(
+      sarpanchVillage,
+      `New Complaint: ${complaintData.title}`,
+      `Category: ${complaintData.category}\nLocation: ${complaintData.location}\nSubmitted by: ${user?.name || 'Citizen'}`,
+      'complaint',
+      req.user.id
+    );
 
     res.status(201).json({ success: true, message: 'Complaint submitted successfully', complaint });
   } catch (error) {
@@ -160,6 +170,7 @@ exports.updateComplaintStatus = async (req, res) => {
 
       if (status === 'Resolved') complaint.resolvedAt = new Date();
 
+      // Send notification to the citizen who filed the complaint
       await sendNotification(
         complaint.userId,
         'Complaint Status Updated',
@@ -167,6 +178,17 @@ exports.updateComplaintStatus = async (req, res) => {
         'complaint',
         complaint._id
       );
+
+      // If sarpanch/govt updates, send village-wide notification about important status changes
+      if (['Resolved', 'In Progress'].includes(status) && isSarpanch(req.user.role)) {
+        await sendToVillage(
+          complaint.village,
+          `Complaint Update: ${complaint.title}`,
+          `Status changed to "${status}"\nLocation: ${complaint.location}\nCategory: ${complaint.category}`,
+          'complaint',
+          req.user.id
+        );
+      }
     }
 
     if (priority) complaint.priority = priority;
