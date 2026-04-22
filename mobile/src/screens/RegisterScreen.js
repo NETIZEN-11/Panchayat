@@ -190,4 +190,5 @@ const styles = StyleSheet.create({
   loginLink: { alignItems: 'center', padding: 14 },
   loginText: { fontSize: 14, color: '#7f8c8d' },
   loginBold: { fontWeight: 'bold' },
-});
+});/ /   E m o j i   r e m o v a l   -   C o m m i t   2 0  
+ 
