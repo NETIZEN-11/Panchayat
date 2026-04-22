@@ -15,9 +15,9 @@ exports.sendNotification = async (userId, title, message, type = 'complaint', re
     await Notification.create({
       userId,
       title,
-      message,
+      body: message,
       type,
-      relatedId,
+      relatedId: referenceId,
     });
 
     // 2. Mock Push Notification (FCM logic would go here)
@@ -29,7 +29,7 @@ exports.sendNotification = async (userId, title, message, type = 'complaint', re
       await admin.messaging().send({
         token: user.fcmToken,
         notification: { title, body: message },
-        data: { type, relatedId: relatedId?.toString() }
+        data: { type, relatedId: referenceId?.toString() }
       });
       */
     }
@@ -37,6 +37,36 @@ exports.sendNotification = async (userId, title, message, type = 'complaint', re
     return true;
   } catch (error) {
     console.error('Error sending notification:', error);
+    return false;
+  }
+};
+
+/**
+ * Send notification to all users in a village
+ * @param {string} village - Village name
+ * @param {string} title - Notification title
+ * @param {string} message - Notification message
+ * @param {string} type - Type of notification
+ * @param {string} excludeUserId - User to exclude (e.g., the sender)
+ */
+exports.sendToVillage = async (village, title, message, type = 'announcement', excludeUserId = null) => {
+  try {
+    const query = { village };
+    if (excludeUserId) query._id = { $ne: excludeUserId };
+
+    const users = await User.find(query);
+    const notifications = users.map(user => ({
+      userId: user._id,
+      title,
+      body: message,
+      type,
+    }));
+
+    await Notification.insertMany(notifications);
+    console.log(`[VILLAGE NOTIFICATION] Sent "${title}" to ${users.length} users in ${village}`);
+    return true;
+  } catch (error) {
+    console.error('Error sending village notification:', error);
     return false;
   }
 };
