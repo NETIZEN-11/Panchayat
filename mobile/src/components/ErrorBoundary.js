@@ -28,7 +28,6 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <View style={styles.container}>
-          <Text style={styles.emoji}>😕</Text>
           <Text style={styles.title}>Oops! Something went wrong</Text>
           <Text style={styles.message}>
             {this.state.error?.message || 'An unexpected error occurred'}
@@ -51,10 +50,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     backgroundColor: '#f5f5f5',
-  },
-  emoji: {
-    fontSize: 64,
-    marginBottom: 20,
   },
   title: {
     fontSize: 24,
