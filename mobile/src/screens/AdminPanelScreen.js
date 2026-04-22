@@ -76,7 +76,6 @@ const AdminPanelScreen = ({ navigation }) => {
           style={styles.actionButton}
           onPress={() => navigation.navigate('Complaints')}
         >
-          <Text style={styles.actionIcon}>📝</Text>
           <Text style={styles.actionText}>Manage Complaints</Text>
         </TouchableOpacity>
 
@@ -84,7 +83,6 @@ const AdminPanelScreen = ({ navigation }) => {
           style={styles.actionButton}
           onPress={() => navigation.navigate('Schemes')}
         >
-          <Text style={styles.actionIcon}>📋</Text>
           <Text style={styles.actionText}>Manage Schemes</Text>
         </TouchableOpacity>
 
@@ -92,7 +90,6 @@ const AdminPanelScreen = ({ navigation }) => {
           style={styles.actionButton}
           onPress={() => navigation.navigate('Polls')}
         >
-          <Text style={styles.actionIcon}>🗳️</Text>
           <Text style={styles.actionText}>Polls</Text>
         </TouchableOpacity>
 
@@ -100,7 +97,6 @@ const AdminPanelScreen = ({ navigation }) => {
           style={styles.actionButton}
           onPress={() => navigation.navigate('Announcements')}
         >
-          <Text style={styles.actionIcon}>📢</Text>
           <Text style={styles.actionText}>Announcements</Text>
         </TouchableOpacity>
 
@@ -108,7 +104,6 @@ const AdminPanelScreen = ({ navigation }) => {
           style={styles.actionButton}
           onPress={() => navigation.navigate('Directory')}
         >
-          <Text style={styles.actionIcon}>📞</Text>
           <Text style={styles.actionText}>Directory</Text>
         </TouchableOpacity>
       </View>
@@ -172,10 +167,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
     elevation: 2,
-  },
-  actionIcon: {
-    fontSize: 24,
-    marginRight: 15,
   },
   actionText: {
     fontSize: 16,
