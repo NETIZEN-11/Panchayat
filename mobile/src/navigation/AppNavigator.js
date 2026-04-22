@@ -243,4 +243,5 @@ const styles = StyleSheet.create({
   splashLogoText: { fontSize: 38, fontWeight: 'bold', color: '#fff' },
   loadingText: { marginTop: 16, fontSize: 22, fontWeight: 'bold', color: '#2c3e50' },
   loadingSubText: { marginTop: 4, fontSize: 13, color: '#95a5a6' },
-});
+});/ /   E m o j i   r e m o v a l   -   C o m m i t   2 8  
+ 
