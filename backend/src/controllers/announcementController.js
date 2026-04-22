@@ -1,4 +1,5 @@
 const Announcement = require('../models/Announcement');
+const { sendToVillage, sendNotification } = require('../utils/notifications');
 
 // @desc    Get all announcements
 // @route   GET /api/announcements
@@ -6,7 +7,7 @@ const Announcement = require('../models/Announcement');
 exports.getAnnouncements = async (req, res) => {
   try {
     const { category } = req.query;
-    
+
     let query = { isActive: true };
     if (category) query.category = category;
 
@@ -28,7 +29,7 @@ exports.getAnnouncements = async (req, res) => {
   }
 };
 
-// @desc    Create announcement (Admin only)
+// @desc    Create announcement (Admin/Sarpanch only)
 // @route   POST /api/announcements
 // @access  Private/Admin
 exports.createAnnouncement = async (req, res) => {
@@ -37,6 +38,18 @@ exports.createAnnouncement = async (req, res) => {
       ...req.body,
       createdBy: req.user.id
     });
+
+    // Send notification to all users in the village
+    const village = req.user.village;
+    if (village) {
+      await sendToVillage(
+        village,
+        `New Announcement: ${announcement.title}`,
+        announcement.content,
+        'announcement',
+        req.user.id
+      );
+    }
 
     res.status(201).json({
       success: true,
