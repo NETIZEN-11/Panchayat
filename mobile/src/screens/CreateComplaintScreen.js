@@ -181,7 +181,7 @@ const CreateComplaintScreen = ({ navigation }) => {
             onPress={getLocation}
             disabled={loading}
           >
-            <Text style={styles.locationButtonText}>📍</Text>
+            <Text style={styles.locationButtonText}>L</Text>
           </TouchableOpacity>
         </View>
 
@@ -192,7 +192,7 @@ const CreateComplaintScreen = ({ navigation }) => {
           disabled={loading}
         >
           <Text style={styles.imageButtonText}>
-            {image ? '✓ Image Selected' : '📷 Pick Image'}
+            {image ? 'Image Selected' : 'Pick Image'}
           </Text>
         </TouchableOpacity>
 
