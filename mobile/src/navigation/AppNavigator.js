@@ -20,6 +20,7 @@ import SchemeDetailScreen from '../screens/SchemeDetailScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ChatbotScreen from '../screens/ChatbotScreen';
 import AnnouncementsScreen from '../screens/AnnouncementsScreen';
+import NotificationScreen from '../screens/NotificationScreen';
 
 // Sarpanch Screens
 import SarpanchDashboardScreen from '../screens/SarpanchDashboardScreen';
@@ -63,6 +64,9 @@ function CitizenHomeStack() {
       <Stack.Screen name="SchemeDetail" component={SchemeDetailScreen} options={{ title: 'Scheme Details' }} />
       <Stack.Screen name="Chatbot" component={ChatbotScreen} options={{ title: 'AI Assistant' }} />
       <Stack.Screen name="Announcements" component={AnnouncementsScreen} options={{ title: 'Announcements' }} />
+      <Stack.Screen name="Notifications" component={NotificationScreen} options={{ title: 'Notifications' }} />
+      <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'My Profile' }} />
+      <Stack.Screen name="Directory" component={DirectoryScreen} options={{ title: 'Village Directory' }} />
     </Stack.Navigator>
   );
 }
@@ -134,6 +138,8 @@ function GovtHomeStack() {
       <Stack.Screen name="AdminComplaintDetail" component={AdminComplaintDetailScreen} options={{ title: 'Complaint Detail' }} />
       <Stack.Screen name="Schemes" component={SchemesScreen} options={{ title: 'Manage Schemes' }} />
       <Stack.Screen name="Announcements" component={AnnouncementsScreen} options={{ title: 'Announcements' }} />
+      <Stack.Screen name="Directory" component={DirectoryScreen} options={{ title: 'Village Directory' }} />
+      <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'My Profile' }} />
     </Stack.Navigator>
   );
 }
