@@ -17,6 +17,8 @@ export default function RegisterScreen({ navigation, route }) {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [village, setVillage] = useState('');
   const [district, setDistrict] = useState('');
   const [role, setRole] = useState(defaultRole);
@@ -97,10 +99,44 @@ export default function RegisterScreen({ navigation, route }) {
           <TextInput style={styles.input} placeholder="Your district (optional)" value={district} onChangeText={setDistrict} autoCapitalize="words" editable={!loading} />
 
           <Text style={styles.label}>Password *</Text>
-          <TextInput style={styles.input} placeholder="Minimum 6 characters" value={password} onChangeText={setPassword} secureTextEntry editable={!loading} />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={[styles.input, styles.passwordInput]}
+              placeholder="Minimum 6 characters"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              editable={!loading}
+            />
+            <TouchableOpacity
+              style={styles.showPasswordBtn}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Text style={styles.showPasswordText}>
+                {showPassword ? 'Hide' : 'Show'}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
           <Text style={styles.label}>Confirm Password *</Text>
-          <TextInput style={styles.input} placeholder="Re-enter password" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry editable={!loading} />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={[styles.input, styles.passwordInput]}
+              placeholder="Re-enter password"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showConfirmPassword}
+              editable={!loading}
+            />
+            <TouchableOpacity
+              style={styles.showPasswordBtn}
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              <Text style={styles.showPasswordText}>
+                {showConfirmPassword ? 'Hide' : 'Show'}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
             style={[styles.button, { backgroundColor: selectedRole?.color || '#27ae60' }, loading && styles.buttonDisabled]}
@@ -141,7 +177,13 @@ const styles = StyleSheet.create({
   roleBtnText: { fontSize: 13, fontWeight: '700', color: '#636e72' },
   roleBtnSub: { fontSize: 11, color: '#b2bec3', marginTop: 2 },
   label: { fontSize: 14, fontWeight: '600', color: '#2c3e50', marginBottom: 6 },
-  input: { backgroundColor: '#fff', borderRadius: 8, padding: 14, marginBottom: 14, borderWidth: 1, borderColor: '#e9ecef', fontSize: 15 },
+  input: { backgroundColor: '#fff', borderRadius: 8, padding: 14, borderWidth: 1, borderColor: '#e9ecef', fontSize: 15 },
+  passwordContainer: { position: 'relative', marginBottom: 14 },
+  passwordInput: { paddingRight: 50 },
+  showPasswordBtn: {
+    position: 'absolute', right: 12, top: 12, padding: 5,
+  },
+  showPasswordText: { fontSize: 20 },
   button: { borderRadius: 10, padding: 16, alignItems: 'center', marginTop: 8 },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
