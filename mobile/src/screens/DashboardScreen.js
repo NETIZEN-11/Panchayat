@@ -8,16 +8,43 @@ import {
 } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import { LanguageContext } from '../context/LanguageContext';
+import api from '../config/api';
 
 const DashboardScreen = ({ navigation }) => {
   const { user } = useContext(AuthContext);
   const { t } = useContext(LanguageContext);
+  const [unreadCount, setUnreadCount] = React.useState(0);
+
+  React.useEffect(() => {
+    fetchUnreadCount();
+  }, []);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await api.get('/notifications');
+      setUnreadCount(res.data.unreadCount || 0);
+    } catch {}
+  };
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>{t('welcome')}, {user?.name}!</Text>
-        <Text style={styles.village}>{user?.village}</Text>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.greeting}>{t('welcome')}, {user?.name}!</Text>
+            <Text style={styles.village}>{user?.village}</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.notifBtn}
+            onPress={() => navigation.navigate('Notifications')}
+          >
+            {unreadCount > 0 && (
+              <View style={styles.notifBadge}>
+                <Text style={styles.notifBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.content}>
@@ -83,6 +110,14 @@ const styles = StyleSheet.create({
     padding: 25, paddingTop: 50,
     borderBottomLeftRadius: 30, borderBottomRightRadius: 30,
   },
+  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  notifBtn: { position: 'relative', padding: 8 },
+  notifBadge: {
+    position: 'absolute', top: 2, right: 2,
+    backgroundColor: '#e74c3c', borderRadius: 10,
+    minWidth: 20, height: 20, justifyContent: 'center', alignItems: 'center',
+  },
+  notifBadgeText: { color: '#fff', fontSize: 11, fontWeight: 'bold' },
   greeting: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 5 },
   village: { fontSize: 15, color: '#bdc3c7', fontWeight: '500' },
   content: { padding: 15 },
