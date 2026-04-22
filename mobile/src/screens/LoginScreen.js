@@ -15,6 +15,7 @@ export default function LoginScreen({ navigation }) {
   const [selectedRole, setSelectedRole] = useState('citizen');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useContext(AuthContext);
 
@@ -110,14 +111,24 @@ export default function LoginScreen({ navigation }) {
           />
 
           <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            editable={!loading}
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={[styles.input, styles.passwordInput]}
+              placeholder="Enter your password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              editable={!loading}
+            />
+            <TouchableOpacity
+              style={styles.showPasswordBtn}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Text style={styles.showPasswordText}>
+                {showPassword ? 'Hide' : 'Show'}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
             style={[styles.button, { backgroundColor: selectedRoleData.color }, loading && styles.buttonDisabled]}
@@ -203,8 +214,14 @@ const styles = StyleSheet.create({
   label: { fontSize: 13, fontWeight: '600', color: '#2c3e50', marginBottom: 6 },
   input: {
     backgroundColor: '#f8f9fa', borderRadius: 10, padding: 14,
-    marginBottom: 16, borderWidth: 1, borderColor: '#dfe6e9', fontSize: 15,
+    borderWidth: 1, borderColor: '#dfe6e9', fontSize: 15,
   },
+  passwordContainer: { position: 'relative', marginBottom: 16 },
+  passwordInput: { paddingRight: 50 },
+  showPasswordBtn: {
+    position: 'absolute', right: 12, top: 12, padding: 5,
+  },
+  showPasswordText: { fontSize: 20 },
   button: { borderRadius: 10, padding: 16, alignItems: 'center', marginTop: 4 },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
