@@ -5,7 +5,7 @@ import { Platform, LogBox } from 'react-native';
 // Ignore specific warnings
 LogBox.ignoreLogs(['Non-serializable values were found in the navigation state']);
 
-// ✅ YOUR MACHINE'S LAN IP — update this if your WiFi IP changes
+// YOUR MACHINE'S LAN IP — update this if your WiFi IP changes
 // Run `ipconfig` on Windows to find your IPv4 address
 const MACHINE_IP = '10.110.158.175';
 
