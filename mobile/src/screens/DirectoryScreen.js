@@ -66,18 +66,18 @@ const DirectoryScreen = () => {
       )}
 
       {item.address && (
-        <Text style={styles.info}>📍 {item.address}</Text>
+        <Text style={styles.info}>Address: {item.address}</Text>
       )}
 
       {item.availability && (
-        <Text style={styles.info}>🕐 {item.availability}</Text>
+        <Text style={styles.info}>Availability: {item.availability}</Text>
       )}
 
       <TouchableOpacity
         style={styles.callButton}
         onPress={() => makeCall(item.phone)}
       >
-        <Text style={styles.callButtonText}>📞 {item.phone}</Text>
+        <Text style={styles.callButtonText}>Call: {item.phone}</Text>
       </TouchableOpacity>
     </View>
   );
