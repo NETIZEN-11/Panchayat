@@ -92,8 +92,8 @@ exports.updateScheme = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Scheme not found' });
     }
 
-    // Only creator or admin can update
-    if (scheme.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
+    // Only creator or admin/sarpanch/govt can update
+    if (scheme.createdBy.toString() !== req.user.id && !['admin', 'sarpanch', 'govt'].includes(req.user.role)) {
       return res.status(403).json({ success: false, message: 'Not authorized to update this scheme' });
     }
 
@@ -133,8 +133,8 @@ exports.deleteScheme = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Scheme not found' });
     }
 
-    // Only creator or admin can delete
-    if (scheme.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
+    // Only creator or admin/sarpanch/govt can delete
+    if (scheme.createdBy.toString() !== req.user.id && !['admin', 'sarpanch', 'govt'].includes(req.user.role)) {
       return res.status(403).json({ success: false, message: 'Not authorized to delete this scheme' });
     }
 

@@ -11,11 +11,11 @@ const { protect, authorize } = require('../middleware/auth');
 
 router.route('/')
   .get(getAllSchemes)
-  .post(protect, authorize('admin'), createScheme);
+  .post(protect, authorize('sarpanch', 'govt', 'admin'), createScheme);
 
 router.route('/:id')
   .get(getSchemeById)
-  .put(protect, authorize('admin'), updateScheme)
-  .delete(protect, authorize('admin'), deleteScheme);
+  .put(protect, authorize('sarpanch', 'govt', 'admin'), updateScheme)
+  .delete(protect, authorize('sarpanch', 'govt', 'admin'), deleteScheme);
 
 module.exports = router;
