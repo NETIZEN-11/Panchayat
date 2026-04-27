@@ -10,10 +10,10 @@ const { protect, authorize } = require('../middleware/auth');
 
 router.route('/')
   .get(getDirectoryEntries)
-  .post(protect, authorize('admin'), createDirectoryEntry);
+  .post(protect, authorize('sarpanch', 'govt', 'admin'), createDirectoryEntry);
 
 router.route('/:id')
-  .put(protect, authorize('admin'), updateDirectoryEntry)
-  .delete(protect, authorize('admin'), deleteDirectoryEntry);
+  .put(protect, authorize('sarpanch', 'govt', 'admin'), updateDirectoryEntry)
+  .delete(protect, authorize('sarpanch', 'govt', 'admin'), deleteDirectoryEntry);
 
 module.exports = router;

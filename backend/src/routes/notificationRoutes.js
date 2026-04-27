@@ -8,7 +8,8 @@ const {
 const { protect } = require('../middleware/auth');
 
 router.get('/', protect, getNotifications);
-router.put('/:id/read', protect, markAsRead);
+// IMPORTANT: /read-all must be defined BEFORE /:id/read to avoid Express matching 'read-all' as an ID
 router.put('/read-all', protect, markAllAsRead);
+router.put('/:id/read', protect, markAsRead);
 
 module.exports = router;

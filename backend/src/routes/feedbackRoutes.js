@@ -7,6 +7,6 @@ const {
 const { protect, authorize } = require('../middleware/auth');
 
 router.post('/', protect, submitFeedback);
-router.get('/', protect, authorize('admin'), getAllFeedback);
+router.get('/', protect, authorize('sarpanch', 'govt', 'admin'), getAllFeedback);
 
 module.exports = router;

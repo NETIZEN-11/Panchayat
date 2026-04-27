@@ -9,7 +9,7 @@ const { protect, authorize } = require('../middleware/auth');
 
 router.route('/')
   .get(protect, getPolls)
-  .post(protect, authorize('admin'), createPoll);
+  .post(protect, authorize('sarpanch', 'govt', 'admin'), createPoll);
 
 router.post('/:id/vote', protect, votePoll);
 
