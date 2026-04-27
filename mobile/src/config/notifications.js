@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import api from './api';
 
 // In Expo Go (SDK 53+), expo-notifications is replaced by a no-op mock via metro.config.js.
-// In a real development build or production build, the real module is used.
+// In a real dev build or production build, the real module is used.
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -14,10 +14,7 @@ Notifications.setNotificationHandler({
 });
 
 export const requestNotificationPermissions = async () => {
-  if (Platform.OS !== 'ios' && Platform.OS !== 'android') {
-    console.log('[Notifications] Unsupported platform — skipping');
-    return false;
-  }
+  if (Platform.OS !== 'ios' && Platform.OS !== 'android') return false;
 
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
@@ -39,18 +36,21 @@ export const registerForPushNotifications = async () => {
   try {
     if (!(await requestNotificationPermissions())) return null;
 
-    const { data: expoPushToken } = await Notifications.getExpoPushTokenAsync({
-      projectConfig: { projectId: 'your-expo-project-id' },
-    });
+    // getExpoPushTokenAsync requires a valid projectId from eas.json / app.json
+    // It will gracefully fail if not configured — we catch and ignore
+    const tokenData = await Notifications.getExpoPushTokenAsync().catch(() => null);
+    const expoPushToken = tokenData?.data;
 
-    if (!expoPushToken) return null;
+    if (!expoPushToken) {
+      console.log('[Notifications] Could not get push token — skipping registration');
+      return null;
+    }
 
     await api.put('/auth/fcm-token', { fcmToken: expoPushToken });
-    console.log('[Notifications] FCM token registered:', expoPushToken);
-
+    console.log('[Notifications] Push token registered:', expoPushToken);
     return expoPushToken;
   } catch (error) {
-    console.error('[Notifications] Registration failed:', error);
+    console.log('[Notifications] Registration failed (non-fatal):', error.message);
     return null;
   }
 };

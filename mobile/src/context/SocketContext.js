@@ -1,8 +1,15 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import { AuthContext } from './AuthContext';
+import { getApiBaseUrl } from '../config/api';
 
 export const SocketContext = createContext();
+
+// Derive socket URL from the API base URL (strip /api suffix)
+const getSocketUrl = () => {
+  const base = getApiBaseUrl(); // e.g. https://smart-panchayat-api.onrender.com/api
+  return base.replace('/api', '');  // → https://smart-panchayat-api.onrender.com
+};
 
 export const SocketProvider = ({ children }) => {
   const { user, token } = useContext(AuthContext);
@@ -12,25 +19,32 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (!token || !user) return;
 
-    const socket = io('http://10.110.158.175:5000', {
+    const socketUrl = getSocketUrl();
+
+    const socket = io(socketUrl, {
       transports: ['websocket'],
       autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 2000,
     });
 
     socketRef.current = socket;
 
     socket.on('connect', () => {
       setConnected(true);
-      console.log('[Socket] Connected:', socket.id);
-      // Join user's village room
+      console.log('[Socket] Connected:', socket.id, '→', socketUrl);
       if (user?.village) socket.emit('join-village', user.village);
-      // Join user's personal room
-      socket.emit('join-user', user?.id);
+      socket.emit('join-user', user?.id || user?._id);
     });
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', (reason) => {
       setConnected(false);
-      console.log('[Socket] Disconnected');
+      console.log('[Socket] Disconnected:', reason);
+    });
+
+    socket.on('connect_error', (err) => {
+      console.log('[Socket] Connection error:', err.message);
     });
 
     socket.on('new-complaint', (complaint) => {
@@ -52,10 +66,10 @@ export const SocketProvider = ({ children }) => {
     return () => {
       socket.disconnect();
     };
-  }, [token, user?.id, user?.village]);
+  }, [token, user?.id, user?._id, user?.village]);
 
   return (
-    <SocketContext.Provider value={{ connected }}>
+    <SocketContext.Provider value={{ connected, socket: socketRef.current }}>
       {children}
     </SocketContext.Provider>
   );
