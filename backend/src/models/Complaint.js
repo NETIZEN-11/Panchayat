@@ -59,9 +59,11 @@ const complaintSchema = new mongoose.Schema(
       default: 'Medium',
     },
     assignedTo: {
-      type: String,  // worker name / contact (free text for simplicity)
-      default: '',
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Worker',
+      default: null,
     },
+    assignedToName: { type: String, default: '' }, // cached display name
     adminNotes: { type: String, default: '' },
     timeline: [
       {

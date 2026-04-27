@@ -1,6 +1,7 @@
 const Complaint = require('../models/Complaint');
 const User = require('../models/User');
 const { sendNotification, sendToVillage } = require('../utils/notifications');
+const { emitNewComplaint, emitComplaintUpdate } = require('../utils/socket');
 
 // Helper: normalize roles (support legacy user/admin)
 const isCitizen = (role) => ['citizen', 'user'].includes(role);
@@ -60,6 +61,9 @@ exports.createComplaint = async (req, res) => {
       'complaint',
       req.user.id
     );
+
+    // Emit real-time update to sarpanch dashboard
+    emitNewComplaint(sarpanchVillage, complaint);
 
     res.status(201).json({ success: true, message: 'Complaint submitted successfully', complaint });
   } catch (error) {
@@ -154,7 +158,7 @@ exports.getComplaintById = async (req, res) => {
 
 exports.updateComplaintStatus = async (req, res) => {
   try {
-    const { status, priority, adminNotes, assignedTo } = req.body;
+    const { status, priority, adminNotes, assignedTo, assignedToName } = req.body;
 
     let complaint = await Complaint.findById(req.params.id);
     if (!complaint) return res.status(404).json({ success: false, message: 'Complaint not found' });
@@ -179,6 +183,9 @@ exports.updateComplaintStatus = async (req, res) => {
         complaint._id
       );
 
+      // Emit real-time update to the citizen
+      emitComplaintUpdate(complaint.userId.toString(), complaint);
+
       // If sarpanch/govt updates, send village-wide notification about important status changes
       if (['Resolved', 'In Progress'].includes(status) && isSarpanch(req.user.role)) {
         await sendToVillage(
@@ -193,7 +200,10 @@ exports.updateComplaintStatus = async (req, res) => {
 
     if (priority) complaint.priority = priority;
     if (adminNotes) complaint.adminNotes = adminNotes;
-    if (assignedTo !== undefined) complaint.assignedTo = assignedTo;
+    if (assignedTo !== undefined) {
+      complaint.assignedTo = assignedTo;
+      complaint.assignedToName = assignedToName || '';
+    }
 
     complaint = await complaint.save();
     res.status(200).json({ success: true, message: 'Complaint updated', complaint });
@@ -239,6 +249,3 @@ exports.escalateOldComplaints = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-/ /   E m o j i   r e m o v a l   -   C o m m i t   1 7  
- / /   F i n a l   e m o j i   r e m o v a l   p a s s   -   C o m m i t   3 1  
- 
