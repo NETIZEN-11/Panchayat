@@ -5,7 +5,10 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "platforms": ["android", "ios"],
+    "platforms": [
+      "android",
+      "ios"
+    ],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -33,11 +36,14 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.smartpanchayat.app"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "extra": {
       "eas": {
-        "projectId": "your-eas-project-id"
+        "projectId": "e11d30ef-300a-43c7-b2cc-ca4f0804b084"
       }
-    }
+    },
+    "owner": "unicorns"
   }
 }
