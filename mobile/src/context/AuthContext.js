@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../config/api';
+import { registerForPushNotifications } from '../config/notifications';
 
 export const AuthContext = createContext();
 
@@ -17,6 +18,8 @@ export function AuthProvider({ children }) {
         if (savedToken && savedUser) {
           setToken(savedToken);
           setUser(JSON.parse(savedUser));
+          // Register for push notifications on app load
+          registerForPushNotifications().catch(() => {});
         }
       } catch (e) {
         console.log('Failed to restore session', e);
@@ -35,6 +38,8 @@ export function AuthProvider({ children }) {
     await AsyncStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
+    // Register for push notifications after login
+    registerForPushNotifications().catch(() => {});
     return response.data;
   };
 
@@ -47,6 +52,7 @@ export function AuthProvider({ children }) {
     await AsyncStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
+    registerForPushNotifications().catch(() => {});
     return response.data;
   };
 
@@ -57,7 +63,6 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  // Helper role checkers
   const isCitizen = () => ['citizen', 'user'].includes(user?.role);
   const isSarpanch = () => ['sarpanch', 'admin'].includes(user?.role);
   const isGovt = () => user?.role === 'govt';
