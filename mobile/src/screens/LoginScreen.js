@@ -232,6 +232,4 @@ const styles = StyleSheet.create({
   registerText: { fontSize: 14, color: '#7f8c8d' },
   registerBold: { fontWeight: 'bold' },
   govtNote: { fontSize: 12, color: '#636e72', textAlign: 'center', marginTop: 16, fontStyle: 'italic' },
-});/ /   E m o j i   r e m o v a l   -   C o m m i t   1 9  
- / /   F i n a l   e m o j i   r e m o v a l   p a s s   -   C o m m i t   3 3  
- 
+});
