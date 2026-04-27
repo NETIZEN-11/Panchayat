@@ -1,9 +1,10 @@
 import React, { useContext } from 'react';
 import { Text, ActivityIndicator, View, StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { AuthContext } from '../context/AuthContext';
+import { ThemeContext } from '../context/ThemeContext';
 
 // Auth Screens
 import LoginScreen from '../screens/LoginScreen';
@@ -72,8 +73,9 @@ function CitizenHomeStack() {
 }
 
 function CitizenTabs() {
+  const { colors } = useContext(ThemeContext);
   return (
-    <Tab.Navigator screenOptions={{ ...citizenTabStyle, headerShown: false }}>
+    <Tab.Navigator screenOptions={{ ...citizenTabStyle, headerShown: false, tabBarStyle: { ...citizenTabStyle.tabBarStyle, backgroundColor: colors.tabBar, borderTopColor: colors.border } }}>
       <Tab.Screen
         name="HomeTab"
         component={CitizenHomeStack}
@@ -108,8 +110,9 @@ function SarpanchHomeStack() {
 }
 
 function SarpanchTabs() {
+  const { colors } = useContext(ThemeContext);
   return (
-    <Tab.Navigator screenOptions={{ ...sarpanchTabStyle, headerShown: false }}>
+    <Tab.Navigator screenOptions={{ ...sarpanchTabStyle, headerShown: false, tabBarStyle: { ...sarpanchTabStyle.tabBarStyle, backgroundColor: colors.tabBar, borderTopColor: colors.border } }}>
       <Tab.Screen
         name="SarpanchHomeTab"
         component={SarpanchHomeStack}
@@ -145,8 +148,9 @@ function GovtHomeStack() {
 }
 
 function GovtTabs() {
+  const { colors } = useContext(ThemeContext);
   return (
-    <Tab.Navigator screenOptions={{ ...govtTabStyle, headerShown: false }}>
+    <Tab.Navigator screenOptions={{ ...govtTabStyle, headerShown: false, tabBarStyle: { ...govtTabStyle.tabBarStyle, backgroundColor: colors.tabBar, borderTopColor: colors.border } }}>
       <Tab.Screen
         name="GovtHomeTab"
         component={GovtHomeStack}
@@ -169,6 +173,19 @@ function GovtTabs() {
 // ─── Root Navigator ───────────────────────────────────────────
 export default function AppNavigator() {
   const { token, loading, isCitizen, isSarpanch, isGovt } = useContext(AuthContext);
+  const { isDark, colors } = useContext(ThemeContext);
+
+  // Build a navigation theme that matches our app theme
+  const navTheme = {
+    ...(isDark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDark ? DarkTheme.colors : DefaultTheme.colors),
+      background: colors.background,
+      card: colors.surface,
+      text: colors.text,
+      border: colors.border,
+    },
+  };
 
   if (loading) {
     return (
@@ -184,7 +201,7 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navTheme}>
       {!token ? (
         <AuthStack />
       ) : isSarpanch() ? (
@@ -243,5 +260,4 @@ const styles = StyleSheet.create({
   splashLogoText: { fontSize: 38, fontWeight: 'bold', color: '#fff' },
   loadingText: { marginTop: 16, fontSize: 22, fontWeight: 'bold', color: '#2c3e50' },
   loadingSubText: { marginTop: 4, fontSize: 13, color: '#95a5a6' },
-});/ /   E m o j i   r e m o v a l   -   C o m m i t   2 8  
- 
+});
