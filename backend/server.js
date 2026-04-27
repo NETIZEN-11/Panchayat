@@ -14,43 +14,71 @@ connectDB();
 
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// ─── CORS ─────────────────────────────────────────────────────
+const allowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(',').map(o => o.trim())
+  : ['*'];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
+
+// ─── Body Parsers ─────────────────────────────────────────────
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ─── Static Files ─────────────────────────────────────────────
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Initialize Firebase and FCM
+// ─── Firebase ─────────────────────────────────────────────────
 initializeFirebase();
 
-// Routes
-app.use('/api/auth', require('./src/routes/authRoutes'));
-app.use('/api/complaints', require('./src/routes/complaintRoutes'));
-app.use('/api/schemes', require('./src/routes/schemeRoutes'));
-app.use('/api/chatbot', require('./src/routes/chatbotRoutes'));
+// ─── Routes ───────────────────────────────────────────────────
+app.use('/api/auth',          require('./src/routes/authRoutes'));
+app.use('/api/complaints',    require('./src/routes/complaintRoutes'));
+app.use('/api/schemes',       require('./src/routes/schemeRoutes'));
+app.use('/api/chatbot',       require('./src/routes/chatbotRoutes'));
 app.use('/api/announcements', require('./src/routes/announcementRoutes'));
-app.use('/api/polls', require('./src/routes/pollRoutes'));
-app.use('/api/directory', require('./src/routes/directoryRoutes'));
+app.use('/api/polls',         require('./src/routes/pollRoutes'));
+app.use('/api/directory',     require('./src/routes/directoryRoutes'));
 app.use('/api/notifications', require('./src/routes/notificationRoutes'));
-app.use('/api/feedback', require('./src/routes/feedbackRoutes'));
-app.use('/api/analytics', require('./src/routes/analyticsRoutes'));
-app.use('/api/workers', require('./src/routes/workerRoutes'));
+app.use('/api/feedback',      require('./src/routes/feedbackRoutes'));
+app.use('/api/analytics',     require('./src/routes/analyticsRoutes'));
+app.use('/api/workers',       require('./src/routes/workerRoutes'));
 
-// Health check
+// ─── Health Check ─────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ success: true, message: 'Server is running' });
+  res.status(200).json({
+    success: true,
+    message: 'Smart Panchayat API is running',
+    env: process.env.NODE_ENV,
+    timestamp: new Date().toISOString(),
+  });
 });
 
-// Error handling middleware
+// ─── 404 Handler ──────────────────────────────────────────────
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
+});
+
+// ─── Error Handler ────────────────────────────────────────────
 app.use(errorHandler);
 
+// ─── Server ───────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
 
-// Initialize Socket.IO
 initSocketIO(server);
 
-// Auto-escalation cron: runs every day at midnight
+// ─── Auto-escalation Cron (daily midnight IST) ────────────────
 cron.schedule('0 0 * * *', async () => {
   try {
     const Complaint = require('./src/models/Complaint');
@@ -61,7 +89,7 @@ cron.schedule('0 0 * * *', async () => {
       { $set: { isEscalated: true, escalatedAt: new Date(), priority: 'Urgent' } }
     );
     if (result.modifiedCount > 0) {
-      console.log(`[CRON] Auto-escalated ${result.modifiedCount} pending complaints older than ${days} days`);
+      console.log(`[CRON] Auto-escalated ${result.modifiedCount} complaints older than ${days} days`);
     }
   } catch (err) {
     console.error('[CRON] Auto-escalation error:', err.message);
@@ -69,5 +97,5 @@ cron.schedule('0 0 * * *', async () => {
 }, { timezone: 'Asia/Kolkata' });
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`[SERVER] Running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
 });

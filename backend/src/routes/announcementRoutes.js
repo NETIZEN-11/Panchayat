@@ -3,13 +3,14 @@ const router = express.Router();
 const {
   getAnnouncements,
   createAnnouncement,
-  addComment
+  addComment,
 } = require('../controllers/announcementController');
 const { protect, authorize } = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
 router.route('/')
   .get(getAnnouncements)
-  .post(protect, authorize('sarpanch', 'govt', 'admin'), createAnnouncement);
+  .post(protect, authorize('sarpanch', 'govt', 'admin'), upload.single('image'), createAnnouncement);
 
 router.post('/:id/comments', protect, addComment);
 

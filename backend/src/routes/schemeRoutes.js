@@ -5,17 +5,18 @@ const {
   getSchemeById,
   createScheme,
   updateScheme,
-  deleteScheme
+  deleteScheme,
 } = require('../controllers/schemeController');
 const { protect, authorize } = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
 router.route('/')
   .get(getAllSchemes)
-  .post(protect, authorize('sarpanch', 'govt', 'admin'), createScheme);
+  .post(protect, authorize('sarpanch', 'govt', 'admin'), upload.single('image'), createScheme);
 
 router.route('/:id')
   .get(getSchemeById)
-  .put(protect, authorize('sarpanch', 'govt', 'admin'), updateScheme)
+  .put(protect, authorize('sarpanch', 'govt', 'admin'), upload.single('image'), updateScheme)
   .delete(protect, authorize('sarpanch', 'govt', 'admin'), deleteScheme);
 
 module.exports = router;
