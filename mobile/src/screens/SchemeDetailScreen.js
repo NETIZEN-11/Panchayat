@@ -11,6 +11,7 @@ import {
   Linking,
 } from 'react-native';
 import { SchemeContext } from '../context/SchemeContext';
+import { getImageBaseUrl } from '../config/api';
 
 const SchemeDetailScreen = ({ route }) => {
   const { id } = route.params;
@@ -53,12 +54,14 @@ const SchemeDetailScreen = ({ route }) => {
     );
   }
 
+  const imgBaseUrl = getImageBaseUrl();
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
         {scheme.image && (
           <Image
-            source={{ uri: `http://192.168.1.100:5000${scheme.image}` }}
+            source={{ uri: `${imgBaseUrl}${scheme.image}` }}
             style={styles.image}
           />
         )}
