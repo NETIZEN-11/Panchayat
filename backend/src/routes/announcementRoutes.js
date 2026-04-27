@@ -9,7 +9,7 @@ const { protect, authorize } = require('../middleware/auth');
 
 router.route('/')
   .get(getAnnouncements)
-  .post(protect, authorize('admin'), createAnnouncement);
+  .post(protect, authorize('sarpanch', 'govt', 'admin'), createAnnouncement);
 
 router.post('/:id/comments', protect, addComment);
 
