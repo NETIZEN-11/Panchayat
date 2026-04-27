@@ -1,19 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ActivityIndicator, Alert, ScrollView, Image, Modal, Dimensions,
+  ActivityIndicator, Alert, ScrollView, Image, Modal,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { ComplaintContext } from '../context/ComplaintContext';
 import { AuthContext } from '../context/AuthContext';
+import api from '../config/api';
 import HistoryTimeline from '../components/HistoryTimeline';
 import { getImageBaseUrl } from '../config/api';
-
-const { width } = Dimensions.get('window');
-
-const STATUS_COLORS = {
-  Pending: '#e74c3c', 'In Progress': '#f39c12', Resolved: '#27ae60', Rejected: '#95a5a6',
-};
 
 const AdminComplaintDetailScreen = ({ route, navigation }) => {
   const { id } = route.params;
@@ -22,7 +17,10 @@ const AdminComplaintDetailScreen = ({ route, navigation }) => {
   const [status, setStatus] = useState('');
   const [priority, setPriority] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
-  const [assignedTo, setAssignedTo] = useState('');
+  const [workers, setWorkers] = useState([]);
+  const [selectedWorkerId, setSelectedWorkerId] = useState('');
+  const [manualAssignee, setManualAssignee] = useState('');
+  const [assignMode, setAssignMode] = useState('picker'); // 'picker' or 'manual'
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const { getComplaintById, updateComplaintStatus } = useContext(ComplaintContext);
@@ -37,7 +35,8 @@ const AdminComplaintDetailScreen = ({ route, navigation }) => {
       setStatus(c.status);
       setPriority(c.priority || 'Medium');
       setAdminNotes(c.adminNotes || '');
-      setAssignedTo(c.assignedTo || '');
+      setSelectedWorkerId(c.assignedTo?._id || '');
+      setManualAssignee(c.assignedToName || '');
     } catch {
       Alert.alert('Error', 'Failed to fetch complaint');
       navigation.goBack();
@@ -46,10 +45,32 @@ const AdminComplaintDetailScreen = ({ route, navigation }) => {
     }
   };
 
+  useEffect(() => {
+    if (user?.village) {
+      fetchWorkers();
+    }
+  }, [user?.village]);
+
+  const fetchWorkers = async () => {
+    try {
+      const res = await api.get(`/workers?village=${user.village}`);
+      setWorkers(res.data.data || []);
+    } catch {}
+  };
+
   const handleUpdate = async () => {
     try {
       setUpdating(true);
-      await updateComplaintStatus(id, { status, priority, adminNotes, assignedTo });
+      const updateData = { status, priority, adminNotes };
+      if (assignMode === 'picker' && selectedWorkerId) {
+        const selectedWorker = workers.find(w => w._id === selectedWorkerId);
+        updateData.assignedTo = selectedWorkerId;
+        updateData.assignedToName = selectedWorker?.name || '';
+      } else if (assignMode === 'manual' && manualAssignee.trim()) {
+        updateData.assignedTo = null;
+        updateData.assignedToName = manualAssignee.trim();
+      }
+      await updateComplaintStatus(id, updateData);
       Alert.alert('Updated', 'Complaint updated successfully');
       navigation.goBack();
     } catch (error) {
@@ -72,7 +93,6 @@ const AdminComplaintDetailScreen = ({ route, navigation }) => {
 
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-      {/* Status Header */}
       <View style={[styles.statusHeader, { backgroundColor: STATUS_COLORS[complaint.status] || '#95a5a6' }]}>
         <Text style={styles.statusHeaderText}>{complaint.status}</Text>
         {complaint.isEscalated && (
@@ -83,19 +103,16 @@ const AdminComplaintDetailScreen = ({ route, navigation }) => {
       </View>
 
       <View style={styles.content}>
-        {/* Complaint Info */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>COMPLAINT DETAILS</Text>
-
           <Text style={styles.label}>Title</Text>
           <Text style={styles.valueText}>{complaint.title}</Text>
-
           <Text style={styles.label}>Description</Text>
           <Text style={styles.valueText}>{complaint.description}</Text>
 
           {complaint.otherDetails ? (
             <>
-              <Text style={styles.label}>Additional Details (Other Category)</Text>
+              <Text style={styles.label}>Additional Details</Text>
               <Text style={styles.valueText}>{complaint.otherDetails}</Text>
             </>
           ) : null}
@@ -110,7 +127,7 @@ const AdminComplaintDetailScreen = ({ route, navigation }) => {
             <View style={{ flex: 1 }}>
               <Text style={styles.label}>Priority</Text>
               <View style={[styles.tagBox, {
-                backgroundColor: complaint.priority === 'Urgent' ? '#e74c3c' : complaint.priority === 'High' ? '#f39c12' : '#3498db'
+                backgroundColor: complaint.priority === 'Urgent' ? '#e74c3c' : complaint.priority === 'High' ? '#f39c12' : '#3498db',
               }]}>
                 <Text style={[styles.tagText, { color: '#fff' }]}>{complaint.priority}</Text>
               </View>
@@ -119,41 +136,32 @@ const AdminComplaintDetailScreen = ({ route, navigation }) => {
 
           <Text style={styles.label}>Location</Text>
           <Text style={styles.valueText}>{complaint.location}</Text>
-
           <Text style={styles.label}>Village / District</Text>
           <Text style={styles.valueText}>{complaint.village} — {complaint.district}</Text>
-
           <Text style={styles.label}>Filed By</Text>
           <Text style={styles.valueText}>{complaint.userId?.name} ({complaint.userId?.phone || 'N/A'})</Text>
-
           <Text style={styles.label}>Date Submitted</Text>
           <Text style={styles.valueText}>{new Date(complaint.createdAt).toLocaleString('en-IN')}</Text>
 
-          {complaint.assignedTo ? (
+          {complaint.assignedToName && (
             <>
               <Text style={styles.label}>Currently Assigned To</Text>
-              <Text style={styles.valueText}>{complaint.assignedTo}</Text>
+              <Text style={styles.valueText}>{complaint.assignedToName}</Text>
             </>
-          ) : null}
+          )}
         </View>
 
-        {/* Images */}
         {images.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>PHOTO EVIDENCE</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {images.map((img, index) => (
-                <Image
-                  key={index}
-                  source={{ uri: `${imgBaseUrl}${img}` }}
-                  style={styles.detailImage}
-                />
+                <Image key={index} source={{ uri: `${imgBaseUrl}${img}` }} style={styles.detailImage} />
               ))}
             </ScrollView>
           </View>
         )}
 
-        {/* Timeline */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>STATUS TIMELINE</Text>
           <HistoryTimeline timeline={complaint.timeline} />
@@ -183,19 +191,50 @@ const AdminComplaintDetailScreen = ({ route, navigation }) => {
             </Picker>
           </View>
 
-          <Text style={styles.label}>Assign Worker / Department</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g. Road Department, Ram Kumar..."
-            value={assignedTo}
-            onChangeText={setAssignedTo}
-            editable={!updating}
-          />
+          {/* Assignment Mode Toggle */}
+          <Text style={styles.label}>Assign Worker</Text>
+          <View style={styles.assignToggle}>
+            <TouchableOpacity
+              style={[styles.toggleBtn, assignMode === 'picker' && styles.toggleBtnActive]}
+              onPress={() => setAssignMode('picker')}
+            >
+              <Text style={[styles.toggleBtnText, assignMode === 'picker' && { color: '#fff' }]}>From List</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.toggleBtn, assignMode === 'manual' && styles.toggleBtnActive]}
+              onPress={() => setAssignMode('manual')}
+            >
+              <Text style={[styles.toggleBtnText, assignMode === 'manual' && { color: '#fff' }]}>Manual</Text>
+            </TouchableOpacity>
+          </View>
+
+          {assignMode === 'picker' ? (
+            workers.length > 0 ? (
+              <View style={styles.pickerContainer}>
+                <Picker selectedValue={selectedWorkerId} onValueChange={setSelectedWorkerId} enabled={!updating}>
+                  <Picker.Item label="— Unassigned —" value="" />
+                  {workers.map(w => (
+                    <Picker.Item key={w._id} label={`${w.name} (${w.department})`} value={w._id} />
+                  ))}
+                </Picker>
+              </View>
+            ) : (
+              <Text style={styles.noWorkersText}>No workers available. Add workers from Admin Dashboard.</Text>
+            )
+          ) : (
+            <TextInput
+              style={styles.input}
+              placeholder="Enter worker name or department..."
+              value={manualAssignee}
+              onChangeText={setManualAssignee}
+              editable={!updating}
+            />
+          )}
 
           <Text style={styles.label}>Remarks / Admin Notes</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
-            placeholder="Add official remarks about this complaint update..."
+            placeholder="Add official remarks..."
             value={adminNotes}
             onChangeText={setAdminNotes}
             multiline
@@ -219,56 +258,36 @@ const AdminComplaintDetailScreen = ({ route, navigation }) => {
   );
 };
 
+const STATUS_COLORS = {
+  Pending: '#e74c3c', 'In Progress': '#f39c12', Resolved: '#27ae60', Rejected: '#95a5a6',
+};
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f0f4f8' },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-
   statusHeader: { padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
   statusHeaderText: { color: '#fff', fontSize: 16, fontWeight: 'bold', letterSpacing: 1 },
-  escalatedTag: {
-    backgroundColor: 'rgba(255,255,255,0.25)', borderRadius: 8,
-    paddingHorizontal: 10, paddingVertical: 3, borderWidth: 1, borderColor: 'rgba(255,255,255,0.5)',
-  },
+  escalatedTag: { backgroundColor: 'rgba(255,255,255,0.25)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 3 },
   escalatedTagText: { color: '#fff', fontSize: 10, fontWeight: 'bold', letterSpacing: 1 },
-
   content: { padding: 15 },
   row: { flexDirection: 'row', marginTop: 4 },
-  section: {
-    backgroundColor: '#fff', borderRadius: 14, padding: 16, marginBottom: 15,
-    elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.07, shadowRadius: 3,
-  },
+  section: { backgroundColor: '#fff', borderRadius: 14, padding: 16, marginBottom: 15, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.07, shadowRadius: 3 },
   updateSection: { borderTopWidth: 4, borderTopColor: '#3498db' },
   sectionTitle: { fontSize: 11, fontWeight: '800', color: '#95a5a6', marginBottom: 14, letterSpacing: 1.5 },
-
   label: { fontSize: 12, fontWeight: '700', color: '#7f8c8d', marginTop: 12, marginBottom: 4 },
-  valueText: {
-    fontSize: 14, color: '#2c3e50', backgroundColor: '#f8f9fa',
-    padding: 10, borderRadius: 8, borderWidth: 1, borderColor: '#ecf0f1',
-  },
-  tagBox: {
-    backgroundColor: '#3498db', borderRadius: 8, paddingHorizontal: 12,
-    paddingVertical: 6, alignSelf: 'flex-start',
-  },
+  valueText: { fontSize: 14, color: '#2c3e50', backgroundColor: '#f8f9fa', padding: 10, borderRadius: 8, borderWidth: 1, borderColor: '#ecf0f1' },
+  tagBox: { backgroundColor: '#3498db', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, alignSelf: 'flex-start' },
   tagText: { color: '#fff', fontSize: 13, fontWeight: 'bold' },
-
-  detailImage: {
-    width: width - 80, height: 200, borderRadius: 10, marginRight: 10,
-  },
-
-  pickerContainer: {
-    backgroundColor: '#f8f9fa', borderRadius: 8,
-    borderWidth: 1, borderColor: '#ecf0f1', overflow: 'hidden', marginBottom: 6,
-  },
-  input: {
-    backgroundColor: '#f8f9fa', borderRadius: 8, padding: 13,
-    borderWidth: 1, borderColor: '#ecf0f1', fontSize: 14, color: '#2c3e50',
-  },
+  detailImage: { width: 280, height: 200, borderRadius: 10, marginRight: 10 },
+  pickerContainer: { backgroundColor: '#f8f9fa', borderRadius: 8, borderWidth: 1, borderColor: '#ecf0f1', overflow: 'hidden', marginBottom: 6 },
+  input: { backgroundColor: '#f8f9fa', borderRadius: 8, padding: 13, borderWidth: 1, borderColor: '#ecf0f1', fontSize: 14, color: '#2c3e50' },
   textArea: { height: 100, textAlignVertical: 'top', marginTop: 4 },
-
-  updateBtn: {
-    backgroundColor: '#3498db', borderRadius: 10, padding: 16,
-    alignItems: 'center', marginTop: 16,
-  },
+  assignToggle: { flexDirection: 'row', marginBottom: 10, gap: 8 },
+  toggleBtn: { flex: 1, backgroundColor: '#f0f4f8', borderRadius: 8, padding: 10, alignItems: 'center', borderWidth: 1, borderColor: '#dfe6e9' },
+  toggleBtnActive: { backgroundColor: '#3498db', borderColor: '#3498db' },
+  toggleBtnText: { fontSize: 13, fontWeight: '600', color: '#7f8c8d' },
+  noWorkersText: { fontSize: 13, color: '#e74c3c', textAlign: 'center', padding: 10 },
+  updateBtn: { backgroundColor: '#3498db', borderRadius: 10, padding: 16, alignItems: 'center', marginTop: 16 },
   btnDisabled: { opacity: 0.6 },
   updateBtnText: { color: '#fff', fontSize: 14, fontWeight: 'bold', letterSpacing: 1 },
 });

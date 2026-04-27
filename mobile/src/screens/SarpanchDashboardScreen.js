@@ -74,6 +74,7 @@ export default function SarpanchDashboardScreen({ navigation }) {
           <ActionBtn label="Village Complaints" color="#3498db" onPress={() => navigation.navigate('VillageComplaints')} />
           <ActionBtn label="Post Announcement" color="#9b59b6" onPress={() => navigation.navigate('Announcements')} />
           <ActionBtn label="Village Directory" color="#27ae60" onPress={() => navigation.navigate('Directory')} />
+          <ActionBtn label="Manage Workers" color="#e67e22" onPress={() => navigation.navigate('Workers')} />
           <ActionBtn label="Escalated Issues" color="#e74c3c" onPress={() => navigation.navigate('VillageComplaints', { filter: 'escalated' })} />
         </View>
       </View>
