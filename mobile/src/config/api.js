@@ -14,11 +14,18 @@ const getStoredOrDefaultIP = async () => {
   return null;
 };
 
-// Resolve initial URL - use stored IP, or emulator localhost, or hardcoded fallback
-const MACHINE_IP = '10.110.158.175'; // Default fallback for physical devices
+// ─── Production URL (Render deployment) ───────────────────────
+// Replace this with your actual Render URL after deploying the backend
+const PRODUCTION_URL = 'https://your-app-name.onrender.com/api';
+
+// Local dev fallback (your machine IP for testing on physical device)
+const MACHINE_IP = '10.110.158.175';
+const DEV_URL = `http://${MACHINE_IP}:5000/api`;
+
+const IS_PRODUCTION = true; // Set to false for local development
 
 const api = axios.create({
-  baseURL: `http://${MACHINE_IP}:5000/api`,
+  baseURL: IS_PRODUCTION ? PRODUCTION_URL : DEV_URL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -27,7 +34,7 @@ const api = axios.create({
 
 // Initialize URL from storage on module load (best effort, non-blocking)
 getStoredOrDefaultIP().then((storedIp) => {
-  if (storedIp) {
+  if (!IS_PRODUCTION && storedIp) {
     api.defaults.baseURL = `http://${storedIp}:5000/api`;
   }
 });
