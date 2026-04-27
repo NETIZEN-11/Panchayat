@@ -258,6 +258,4 @@ exports.getFAQ = async (req, res) => {
       message: error.message
     });
   }
-};/ /   E m o j i   r e m o v a l   -   C o m m i t   1 5  
- / /   F i n a l   e m o j i   r e m o v a l   p a s s   -   C o m m i t   2 9  
- 
+};
