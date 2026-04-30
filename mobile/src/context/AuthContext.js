@@ -13,21 +13,37 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const bootstrapAsync = async () => {
       try {
+        console.log('🔄 Checking saved session...');
         const savedToken = await AsyncStorage.getItem('token');
         const savedUser = await AsyncStorage.getItem('user');
+        
         if (savedToken && savedUser) {
+          console.log('✅ Found saved session');
           setToken(savedToken);
           setUser(JSON.parse(savedUser));
           // Register for push notifications on app load
           registerForPushNotifications().catch(() => {});
+        } else {
+          console.log('❌ No saved session found');
         }
       } catch (e) {
-        console.log('Failed to restore session', e);
+        console.log('❌ Failed to restore session', e);
+        // Clear corrupted data
+        await AsyncStorage.multiRemove(['token', 'user']).catch(() => {});
       } finally {
+        console.log('✅ Auth initialization complete');
         setLoading(false);
       }
     };
-    const timer = setTimeout(bootstrapAsync, 100);
+    
+    // Add timeout to prevent infinite loading
+    const timer = setTimeout(() => {
+      console.log('⚠️ Auth timeout - forcing load complete');
+      setLoading(false);
+    }, 3000);
+    
+    bootstrapAsync().finally(() => clearTimeout(timer));
+    
     return () => clearTimeout(timer);
   }, []);
 
