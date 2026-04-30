@@ -53,6 +53,11 @@ app.use('/api/notifications', require('./src/routes/notificationRoutes'));
 app.use('/api/feedback',      require('./src/routes/feedbackRoutes'));
 app.use('/api/analytics',     require('./src/routes/analyticsRoutes'));
 app.use('/api/workers',       require('./src/routes/workerRoutes'));
+app.use('/api/emergency',     require('./src/routes/emergencyAlertRoutes'));
+app.use('/api/documents',     require('./src/routes/documentRoutes'));
+app.use('/api/assets',        require('./src/routes/assetRoutes'));
+app.use('/api/meetings',      require('./src/routes/meetingRoutes'));
+app.use('/api/lostfound',     require('./src/routes/lostFoundRoutes'));
 
 // ─── Health Check ─────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

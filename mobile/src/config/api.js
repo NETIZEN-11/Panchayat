@@ -9,10 +9,10 @@ LogBox.ignoreLogs(['Non-serializable values were found in the navigation state']
 //  After deploying to Render, paste your URL below and set
 //  IS_PRODUCTION = true
 // ─────────────────────────────────────────────────────────────
-const IS_PRODUCTION = true; // ← Production mode ON
+const IS_PRODUCTION = false; // ← Development mode ON
 
 const PRODUCTION_URL = 'https://panchayat-t1ui.onrender.com'; // ← Render URL
-const DEV_URL        = 'http://10.110.158.175:5000';                // ← your local machine IP
+const DEV_URL        = 'http://localhost:5000';                // ← Local backend server
 
 export const BACKEND_URL = IS_PRODUCTION ? PRODUCTION_URL : DEV_URL;
 

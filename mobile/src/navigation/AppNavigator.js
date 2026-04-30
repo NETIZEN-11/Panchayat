@@ -22,6 +22,15 @@ import ProfileScreen from '../screens/ProfileScreen';
 import ChatbotScreen from '../screens/ChatbotScreen';
 import AnnouncementsScreen from '../screens/AnnouncementsScreen';
 import NotificationScreen from '../screens/NotificationScreen';
+import DocumentsScreen from '../screens/DocumentsScreen';
+import EmergencyAlertsScreen from '../screens/EmergencyAlertsScreen';
+import WeatherAlertsScreen from '../screens/WeatherAlertsScreen';
+import MeetingsScreen from '../screens/MeetingsScreen';
+import AssetsScreen from '../screens/AssetsScreen';
+import LostFoundScreen from '../screens/LostFoundScreen';
+import GrievanceScreen from '../screens/GrievanceScreen';
+import QRCodeScannerScreen from '../screens/QRCodeScannerScreen';
+import PollResultsScreen from '../screens/PollResultsScreen';
 
 // Sarpanch Screens
 import SarpanchDashboardScreen from '../screens/SarpanchDashboardScreen';
@@ -68,6 +77,15 @@ function CitizenHomeStack() {
       <Stack.Screen name="Notifications" component={NotificationScreen} options={{ title: 'Notifications' }} />
       <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'My Profile' }} />
       <Stack.Screen name="Directory" component={DirectoryScreen} options={{ title: 'Village Directory' }} />
+      <Stack.Screen name="Documents" component={DocumentsScreen} options={{ title: 'My Documents' }} />
+      <Stack.Screen name="EmergencyAlerts" component={EmergencyAlertsScreen} options={{ title: 'Emergency Alerts' }} />
+      <Stack.Screen name="WeatherAlerts" component={WeatherAlertsScreen} options={{ title: 'Weather' }} />
+      <Stack.Screen name="Meetings" component={MeetingsScreen} options={{ title: 'Meetings' }} />
+      <Stack.Screen name="Assets" component={AssetsScreen} options={{ title: 'Panchayat Assets' }} />
+      <Stack.Screen name="LostFound" component={LostFoundScreen} options={{ title: 'Lost & Found' }} />
+      <Stack.Screen name="Grievance" component={GrievanceScreen} options={{ title: 'Grievance Redressal' }} />
+      <Stack.Screen name="QRScanner" component={QRCodeScannerScreen} options={{ title: 'Scan QR Code' }} />
+      <Stack.Screen name="PollResults" component={PollResultsScreen} options={{ title: 'Poll Results' }} />
     </Stack.Navigator>
   );
 }
@@ -105,6 +123,10 @@ function SarpanchHomeStack() {
       <Stack.Screen name="Announcements" component={AnnouncementsScreen} options={{ title: 'Announcements' }} />
       <Stack.Screen name="Schemes" component={SchemesScreen} options={{ title: 'Govt Schemes' }} />
       <Stack.Screen name="Directory" component={DirectoryScreen} options={{ title: 'Village Directory' }} />
+      <Stack.Screen name="EmergencyAlerts" component={EmergencyAlertsScreen} options={{ title: 'Emergency Alerts' }} />
+      <Stack.Screen name="Meetings" component={MeetingsScreen} options={{ title: 'Meetings' }} />
+      <Stack.Screen name="Assets" component={AssetsScreen} options={{ title: 'Assets' }} />
+      <Stack.Screen name="Documents" component={DocumentsScreen} options={{ title: 'Documents' }} />
     </Stack.Navigator>
   );
 }
@@ -143,6 +165,10 @@ function GovtHomeStack() {
       <Stack.Screen name="Announcements" component={AnnouncementsScreen} options={{ title: 'Announcements' }} />
       <Stack.Screen name="Directory" component={DirectoryScreen} options={{ title: 'Village Directory' }} />
       <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'My Profile' }} />
+      <Stack.Screen name="EmergencyAlerts" component={EmergencyAlertsScreen} options={{ title: 'Emergency Alerts' }} />
+      <Stack.Screen name="Meetings" component={MeetingsScreen} options={{ title: 'Meetings' }} />
+      <Stack.Screen name="Assets" component={AssetsScreen} options={{ title: 'Assets' }} />
+      <Stack.Screen name="Documents" component={DocumentsScreen} options={{ title: 'Documents' }} />
     </Stack.Navigator>
   );
 }

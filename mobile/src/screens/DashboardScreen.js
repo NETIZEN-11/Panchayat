@@ -100,6 +100,86 @@ const DashboardScreen = ({ navigation }) => {
           <Text style={[styles.cardTitle, { color: colors.text }]}>{t('profile')}</Text>
           <Text style={[styles.cardDescription, { color: colors.textSecondary }]}>Manage your account and language</Text>
         </TouchableOpacity>
+
+        <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 10 }]}>Quick Access</Text>
+
+        <View style={styles.row}>
+          <TouchableOpacity
+            style={[styles.smallCard, { backgroundColor: '#e74c3c' }]}
+            onPress={() => navigation.navigate('EmergencyAlerts')}
+          >
+            <Text style={styles.smallCardIcon}>🚨</Text>
+            <Text style={styles.smallCardLabel}>Emergency</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.smallCard, { backgroundColor: '#3498db' }]}
+            onPress={() => navigation.navigate('WeatherAlerts')}
+          >
+            <Text style={styles.smallCardIcon}>🌤️</Text>
+            <Text style={styles.smallCardLabel}>Weather</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.smallCard, { backgroundColor: '#27ae60' }]}
+            onPress={() => navigation.navigate('Meetings')}
+          >
+            <Text style={styles.smallCardIcon}>📅</Text>
+            <Text style={styles.smallCardLabel}>Meetings</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.row}>
+          <TouchableOpacity
+            style={[styles.smallCard, { backgroundColor: '#f39c12' }]}
+            onPress={() => navigation.navigate('Documents')}
+          >
+            <Text style={styles.smallCardIcon}>📄</Text>
+            <Text style={styles.smallCardLabel}>Documents</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.smallCard, { backgroundColor: '#9b59b6' }]}
+            onPress={() => navigation.navigate('Assets')}
+          >
+            <Text style={styles.smallCardIcon}>🏢</Text>
+            <Text style={styles.smallCardLabel}>Assets</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.smallCard, { backgroundColor: '#e67e22' }]}
+            onPress={() => navigation.navigate('LostFound')}
+          >
+            <Text style={styles.smallCardIcon}>🔍</Text>
+            <Text style={styles.smallCardLabel}>Lost & Found</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.row}>
+          <TouchableOpacity
+            style={[styles.smallCard, { backgroundColor: '#1abc9c' }]}
+            onPress={() => navigation.navigate('PollResults')}
+          >
+            <Text style={styles.smallCardIcon}>📊</Text>
+            <Text style={styles.smallCardLabel}>Polls</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.smallCard, { backgroundColor: '#34495e' }]}
+            onPress={() => navigation.navigate('QRScanner')}
+          >
+            <Text style={styles.smallCardIcon}>📱</Text>
+            <Text style={styles.smallCardLabel}>Scan QR</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.smallCard, { backgroundColor: '#8e44ad' }]}
+            onPress={() => navigation.navigate('Grievance')}
+          >
+            <Text style={styles.smallCardIcon}>📮</Text>
+            <Text style={styles.smallCardLabel}>Grievance</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );
@@ -123,7 +203,8 @@ const styles = StyleSheet.create({
   greeting: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 5 },
   village: { fontSize: 15, color: '#bdc3c7', fontWeight: '500' },
   content: { padding: 15 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 },
+  sectionTitle: { fontSize: 14, fontWeight: 'bold', marginBottom: 10 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
   halfCard: {
     borderRadius: 14, padding: 20,
     width: '48%', elevation: 3, borderTopWidth: 4,
@@ -146,6 +227,12 @@ const styles = StyleSheet.create({
   cardLabel: { fontSize: 11, fontWeight: '800', letterSpacing: 1.5, marginBottom: 8 },
   cardTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 5 },
   cardDescription: { fontSize: 13 },
+  smallCard: {
+    flex: 1, marginHorizontal: 4, borderRadius: 12,
+    padding: 15, alignItems: 'center', elevation: 3,
+  },
+  smallCardIcon: { fontSize: 24, marginBottom: 6 },
+  smallCardLabel: { color: '#fff', fontSize: 10, fontWeight: 'bold', textAlign: 'center' },
 });
 
 export default DashboardScreen;
