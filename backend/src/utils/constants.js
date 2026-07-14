@@ -19,13 +19,9 @@ const COMPLAINT_PRIORITY = {
 };
 
 const COMPLAINT_CATEGORIES = [
-  'water',
-  'road',
-  'electricity',
-  'sanitation',
-  'health',
-  'education',
-  'other'
+  'Road', 'Water', 'Electricity', 'Sanitation', 'Health', 'Education',
+  'Drainage', 'Street Light', 'Public Property', 'Pollution',
+  'Animal Nuisance', 'Encroachment', 'Government Services', 'Other'
 ];
 
 // User roles

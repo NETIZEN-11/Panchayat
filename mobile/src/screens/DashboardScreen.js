@@ -40,6 +40,7 @@ const DashboardScreen = ({ navigation }) => {
             style={styles.notifBtn}
             onPress={() => navigation.navigate('Notifications')}
           >
+            <Text style={styles.notifIcon}>🔔</Text>
             {unreadCount > 0 && (
               <View style={styles.notifBadge}>
                 <Text style={styles.notifBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
@@ -169,7 +170,7 @@ const DashboardScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('QRScanner')}
           >
             <Text style={styles.smallCardIcon}>📱</Text>
-            <Text style={styles.smallCardLabel}>Scan QR</Text>
+            <Text style={styles.smallCardLabel}>Verify Doc</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -194,6 +195,7 @@ const styles = StyleSheet.create({
   },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   notifBtn: { position: 'relative', padding: 8 },
+  notifIcon: { fontSize: 24 },
   notifBadge: {
     position: 'absolute', top: 2, right: 2,
     backgroundColor: '#e74c3c', borderRadius: 10,

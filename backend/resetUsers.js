@@ -1,8 +1,11 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const dotenv = require('dotenv');
 
-// IMPORTANT: Use same DB name as in .env
-const MONGO_URI = 'mongodb://localhost:27017/smart-panchayat';
+dotenv.config();
+
+// Use environment variable or fallback
+const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/smart-panchayat';
 
 const resetAllUsers = async () => {
   try {

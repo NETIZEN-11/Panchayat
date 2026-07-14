@@ -37,6 +37,8 @@ import SarpanchDashboardScreen from '../screens/SarpanchDashboardScreen';
 import VillageComplaintsScreen from '../screens/VillageComplaintsScreen';
 import AdminComplaintDetailScreen from '../screens/AdminComplaintDetailScreen';
 import AdminDashboardScreen from '../screens/AdminDashboardScreen';
+import WorkersScreen from '../screens/WorkersScreen';
+import PollsScreen from '../screens/PollsScreen';
 
 // Govt Screens
 import GovtDashboardScreen from '../screens/GovtDashboardScreen';
@@ -127,6 +129,8 @@ function SarpanchHomeStack() {
       <Stack.Screen name="Meetings" component={MeetingsScreen} options={{ title: 'Meetings' }} />
       <Stack.Screen name="Assets" component={AssetsScreen} options={{ title: 'Assets' }} />
       <Stack.Screen name="Documents" component={DocumentsScreen} options={{ title: 'Documents' }} />
+      <Stack.Screen name="Workers" component={WorkersScreen} options={{ title: 'Village Workers' }} />
+      <Stack.Screen name="Polls" component={PollsScreen} options={{ title: 'Polls' }} />
     </Stack.Navigator>
   );
 }
@@ -169,6 +173,7 @@ function GovtHomeStack() {
       <Stack.Screen name="Meetings" component={MeetingsScreen} options={{ title: 'Meetings' }} />
       <Stack.Screen name="Assets" component={AssetsScreen} options={{ title: 'Assets' }} />
       <Stack.Screen name="Documents" component={DocumentsScreen} options={{ title: 'Documents' }} />
+      <Stack.Screen name="Polls" component={PollsScreen} options={{ title: 'Polls' }} />
     </Stack.Navigator>
   );
 }

@@ -74,7 +74,7 @@ const AdminPanelScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.actionsContainer}>
-        <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('Complaints')}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('VillageComplaints')}>
           <Text style={styles.actionText}>Manage Complaints</Text>
         </TouchableOpacity>
 

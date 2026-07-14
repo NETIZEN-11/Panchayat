@@ -8,7 +8,7 @@ dotenv.config();
 
 const seedData = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/smartpanchayat');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/smartpanchayat');
     console.log('Connected to MongoDB');
 
     // Find a citizen and sarpanch to use as reference

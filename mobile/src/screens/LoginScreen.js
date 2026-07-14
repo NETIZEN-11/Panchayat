@@ -100,7 +100,7 @@ export default function LoginScreen({ navigation }) {
 
           <Text style={styles.label}>Email</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { marginBottom: 14 }]}
             placeholder="Enter your email"
             value={email}
             onChangeText={setEmail}

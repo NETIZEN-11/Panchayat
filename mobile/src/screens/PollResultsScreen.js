@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  ActivityIndicator, RefreshControl, Modal, Alert, KeyboardAvoidingView, Platform,
+  ActivityIndicator, RefreshControl, Modal, Dimensions,
 } from 'react-native';
-import { BarChart } from 'react-native-chart-kit';
-import { Dimensions } from 'react-native';
 import api from '../config/api';
 import { ThemeContext } from '../context/ThemeContext';
 
@@ -36,6 +34,20 @@ const PollResultsScreen = () => {
     return poll.options.reduce((prev, current) => (current.votes || 0) > (prev.votes || 0) ? current : prev);
   };
 
+  // Simple bar chart using View widths instead of react-native-chart-kit
+  const SimpleBar = ({ label, votes, total, color = '#3498db' }) => {
+    const pct = total > 0 ? (votes / total) * 100 : 0;
+    return (
+      <View style={styles.barRow}>
+        <Text style={[styles.barLabel, { color: colors.textSecondary }]} numberOfLines={1}>{label}</Text>
+        <View style={[styles.barTrack, { backgroundColor: colors.border }]}>
+          <View style={[styles.barFill, { width: `${pct}%`, backgroundColor: color }]} />
+        </View>
+        <Text style={[styles.barValue, { color: colors.text }]}>{votes}</Text>
+      </View>
+    );
+  };
+
   const renderPollCard = ({ item }) => {
     const totalVotes = getTotalVotes(item);
     const winner = getWinningOption(item);
@@ -47,29 +59,20 @@ const PollResultsScreen = () => {
             <Text style={styles.statusText}>{item.isActive ? 'Active' : 'Closed'}</Text>
           </View>
         </View>
-        <View style={styles.chartPreview}>
-          <BarChart
-            data={{
-              labels: item.options.slice(0, 4).map((_, i) => `O${i + 1}`),
-              datasets: [{ data: item.options.slice(0, 4).map(o => o.votes || 0) }]
-            }}
-            width={screenWidth - 80}
-            height={100}
-            chartConfig={{
-              backgroundColor: colors.card,
-              backgroundGradientFrom: colors.card,
-              backgroundGradientTo: colors.card,
-              decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(52, 152, 219, ${opacity})`,
-              labelColor: () => colors.textSecondary,
-              barPercentage: 0.6,
-            }}
-            style={{ borderRadius: 10 }}
-            fromZero
-            showValuesOnTopOfBars
-          />
+
+        {/* Mini bar preview */}
+        <View style={styles.previewBars}>
+          {item.options.slice(0, 4).map((opt, i) => (
+            <SimpleBar
+              key={i}
+              label={opt.text}
+              votes={opt.votes || 0}
+              total={totalVotes}
+            />
+          ))}
         </View>
-        <View style={styles.cardFooter}>
+
+        <View style={[styles.cardFooter, { borderTopColor: colors.border }]}>
           <Text style={[styles.voteCount, { color: colors.textSecondary }]}>Total: {totalVotes} votes</Text>
           <Text style={[styles.winnerText, { color: '#27ae60' }]}>Leading: {winner?.text || 'N/A'}</Text>
         </View>
@@ -91,37 +94,18 @@ const PollResultsScreen = () => {
             {selectedPoll.questionHindi && (
               <Text style={[styles.hindiText, { color: colors.textSecondary }]}>{selectedPoll.questionHindi}</Text>
             )}
-            <BarChart
-              data={{
-                labels: selectedPoll.options.map((o, i) => `Option ${i + 1}`),
-                datasets: [{ data: selectedPoll.options.map(o => o.votes || 0) }]
-              }}
-              width={screenWidth - 80}
-              height={220}
-              chartConfig={{
-                backgroundColor: colors.card,
-                backgroundGradientFrom: colors.card,
-                backgroundGradientTo: colors.card,
-                decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(52, 152, 219, ${opacity})`,
-                labelColor: () => colors.text,
-                barPercentage: 0.5,
-              }}
-              style={{ borderRadius: 10, marginVertical: 15 }}
-              fromZero
-              showValuesOnTopOfBars
-            />
+
             <View style={styles.optionsList}>
               {selectedPoll.options.map((option, index) => {
-                const percentage = totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0;
+                const pct = totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0;
                 return (
                   <View key={index} style={[styles.optionItem, { backgroundColor: colors.inputBg }]}>
                     <View style={styles.optionHeader}>
                       <Text style={[styles.optionText, { color: colors.text }]}>{option.text}</Text>
-                      <Text style={[styles.percentage, { color: '#3498db' }]}>{percentage}%</Text>
+                      <Text style={[styles.percentage, { color: '#3498db' }]}>{pct}%</Text>
                     </View>
                     <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
-                      <View style={[styles.progressFill, { width: `${percentage}%` }]} />
+                      <View style={[styles.progressFill, { width: `${pct}%` }]} />
                     </View>
                     <Text style={[styles.optionVotes, { color: colors.textSecondary }]}>{option.votes || 0} votes</Text>
                   </View>
@@ -163,12 +147,17 @@ const styles = StyleSheet.create({
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: 15 },
   card: { padding: 15, borderRadius: 12, marginBottom: 15, elevation: 3 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
   question: { flex: 1, fontSize: 16, fontWeight: 'bold', marginRight: 10 },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
   statusText: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
-  chartPreview: { alignItems: 'center', marginVertical: 10 },
-  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#e0e0e0' },
+  previewBars: { gap: 6, marginBottom: 12 },
+  barRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  barLabel: { width: 80, fontSize: 11 },
+  barTrack: { flex: 1, height: 8, borderRadius: 4, overflow: 'hidden' },
+  barFill: { height: '100%', borderRadius: 4 },
+  barValue: { width: 24, fontSize: 11, fontWeight: 'bold', textAlign: 'right' },
+  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: 10, borderTopWidth: 1 },
   voteCount: { fontSize: 12, fontWeight: 'bold' },
   winnerText: { fontSize: 12, fontWeight: 'bold' },
   empty: { alignItems: 'center', marginTop: 50 },

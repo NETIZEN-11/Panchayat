@@ -56,7 +56,7 @@ const EmergencyAlertsScreen = () => {
   };
 
   const getTypeIcon = (type) => {
-    const icons = { earthquake: '地震', flood: '🌊', fire: '🔥', landslide: '⛰️', cyclone: '🌀', medical: '🏥', other: '⚠️' };
+    const icons = { earthquake: '🌍', flood: '🌊', fire: '🔥', landslide: '⛰️', cyclone: '🌀', medical: '🏥', other: '⚠️' };
     return icons[type] || '⚠️';
   };
 

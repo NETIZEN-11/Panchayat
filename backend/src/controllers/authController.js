@@ -20,8 +20,9 @@ exports.register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'User already exists with this email' });
     }
 
-    // Allow citizen, sarpanch, and govt self-registration
-    const allowedRoles = ['citizen', 'sarpanch', 'govt', 'user'];
+    // Allow citizen and sarpanch self-registration only.
+    // Govt accounts must be created by admin or directly in DB.
+    const allowedRoles = ['citizen', 'sarpanch', 'user'];
     const assignedRole = allowedRoles.includes(role) ? role : 'citizen';
 
     user = await User.create({

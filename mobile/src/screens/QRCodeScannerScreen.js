@@ -1,110 +1,113 @@
 import React, { useState, useContext } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Alert,
-  TextInput, Modal, Platform,
+  TextInput, Modal,
 } from 'react-native';
-import { Camera } from 'expo-camera';
-import * as ImagePicker from 'expo-image-picker';
 import api from '../config/api';
 import { ThemeContext } from '../context/ThemeContext';
 
+// expo-camera is not included in this build.
+// QR scanning is done by entering the scheme ID manually.
+
 const QRCodeScannerScreen = ({ navigation }) => {
   const { colors } = useContext(ThemeContext);
-  const [scanned, setScanned] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [schemeId, setSchemeId] = useState('');
+  const [loading, setLoading] = useState(false);
   const [resultData, setResultData] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const handleBarCodeScanned = ({ type, data }) => {
-    setScanned(true);
-    try {
-      const parsed = JSON.parse(data);
-      setResultData(parsed);
-      setModalVisible(true);
-    } catch {
-      Alert.alert('Invalid QR', 'This QR code is not a valid scheme document', [
-        { text: 'Scan Again', onPress: () => setScanned(false) }
-      ]);
+  const verifyScheme = async () => {
+    const id = schemeId.trim();
+    if (!id) {
+      Alert.alert('Error', 'Please enter a Scheme ID');
+      return;
     }
-  };
-
-  const verifyWithBackend = async () => {
-    if (!resultData?.id) return;
+    setLoading(true);
     try {
-      const response = await api.get(`/schemes/${resultData.id}`);
+      const response = await api.get(`/schemes/${id}`);
       if (response.data.success) {
-        Alert.alert('✓ Verified', `Scheme: ${response.data.scheme.name}\nStatus: Valid Document`, [
-          { text: 'OK', onPress: () => { setModalVisible(false); setScanned(false); } }
-        ]);
+        setResultData(response.data.scheme);
+        setModalVisible(true);
       }
-    } catch {
-      Alert.alert('⚠️ Not Found', 'This scheme is not registered in our system', [
-        { text: 'Scan Again', onPress: () => { setModalVisible(false); setScanned(false); } }
-      ]);
+    } catch (error) {
+      let msg = 'This scheme is not registered in our system';
+      if (error.message?.includes('Network') || error.message?.includes('connect')) {
+        msg = 'Cannot connect to server. Please check your internet connection.';
+      } else if (error.response?.status === 404) {
+        msg = 'Scheme not found in our database';
+      } else if (error.response?.status >= 500) {
+        msg = 'Server error. Please try again later.';
+      }
+      Alert.alert('Verification Failed', msg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.card }]}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>📱 Scan Scheme QR</Text>
-        <Text style={[styles.headerSub, { color: colors.textSecondary }]}>Scan QR code on scheme documents to verify authenticity</Text>
+        <Text style={styles.headerIcon}>📱</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Verify Scheme Document</Text>
+        <Text style={[styles.headerSub, { color: colors.textSecondary }]}>
+          Enter the Scheme ID printed on the document to verify its authenticity
+        </Text>
       </View>
 
-      <View style={styles.cameraContainer}>
-        <Camera
-          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-          style={styles.camera}
-          barcodeTypes={['qr']}
+      {/* Input */}
+      <View style={[styles.inputSection, { backgroundColor: colors.card }]}>
+        <Text style={[styles.label, { color: colors.text }]}>Scheme ID</Text>
+        <TextInput
+          style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.border, color: colors.text }]}
+          placeholder="Enter scheme ID from document..."
+          placeholderTextColor={colors.textSecondary}
+          value={schemeId}
+          onChangeText={setSchemeId}
+          autoCapitalize="none"
+          autoCorrect={false}
         />
-        <View style={styles.overlay}>
-          <View style={styles.scanArea}>
-            <View style={[styles.corner, styles.topLeft]} />
-            <View style={[styles.corner, styles.topRight]} />
-            <View style={[styles.corner, styles.bottomLeft]} />
-            <View style={[styles.corner, styles.bottomRight]} />
-          </View>
-        </View>
+        <TouchableOpacity
+          style={[styles.verifyBtn, loading && styles.verifyBtnDisabled]}
+          onPress={verifyScheme}
+          disabled={loading}
+        >
+          <Text style={styles.verifyBtnText}>{loading ? 'Verifying...' : '✓ Verify Document'}</Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={[styles.instructions, { backgroundColor: colors.card }]}>
-        <Text style={[styles.instructionTitle, { color: colors.text }]}>How to use:</Text>
-        <Text style={[styles.instructionText, { color: colors.textSecondary }]}>1. Point camera at scheme QR code</Text>
-        <Text style={[styles.instructionText, { color: colors.textSecondary }]}>2. Hold steady for 1-2 seconds</Text>
-        <Text style={[styles.instructionText, { color: colors.textSecondary }]}>3. System will verify the scheme</Text>
+      {/* Info */}
+      <View style={[styles.infoBox, { backgroundColor: colors.card }]}>
+        <Text style={[styles.infoTitle, { color: colors.text }]}>ℹ️ How to verify:</Text>
+        <Text style={[styles.infoText, { color: colors.textSecondary }]}>1. Find the Scheme ID on your document</Text>
+        <Text style={[styles.infoText, { color: colors.textSecondary }]}>2. Enter it in the field above</Text>
+        <Text style={[styles.infoText, { color: colors.textSecondary }]}>3. Tap Verify to check authenticity</Text>
       </View>
 
-      <TouchableOpacity style={styles.galleryBtn} onPress={async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-          allowsEditing: true,
-          barcodeScanner: true,
-        });
-        if (!result.canceled && result.assets[0]) {
-          Alert.alert('Gallery', 'Please use camera for QR scanning');
-        }
-      }}>
-        <Text style={styles.galleryBtnText}>📷 Scan from Gallery</Text>
-      </TouchableOpacity>
-
+      {/* Result Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>QR Code Detected</Text>
+            <View style={styles.verifiedBadge}>
+              <Text style={styles.verifiedIcon}>✓</Text>
+            </View>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Document Verified</Text>
             {resultData && (
-              <View style={styles.resultBox}>
-                <Text style={[styles.resultLabel, { color: colors.textSecondary }]}>Scheme ID:</Text>
-                <Text style={[styles.resultValue, { color: colors.text }]}>{resultData.id || 'N/A'}</Text>
-                <Text style={[styles.resultLabel, { color: colors.textSecondary }]}>Type:</Text>
-                <Text style={[styles.resultValue, { color: colors.text }]}>{resultData.type || 'Scheme Document'}</Text>
+              <View style={[styles.resultBox, { backgroundColor: colors.inputBg }]}>
+                <Text style={[styles.resultLabel, { color: colors.textSecondary }]}>Scheme Name</Text>
+                <Text style={[styles.resultValue, { color: colors.text }]}>{resultData.name || 'N/A'}</Text>
+                <Text style={[styles.resultLabel, { color: colors.textSecondary }]}>Category</Text>
+                <Text style={[styles.resultValue, { color: colors.text }]}>{resultData.category || 'N/A'}</Text>
+                <Text style={[styles.resultLabel, { color: colors.textSecondary }]}>Status</Text>
+                <Text style={[styles.resultValue, { color: '#27ae60' }]}>Valid ✓</Text>
               </View>
             )}
-            <View style={styles.modalBtns}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => { setModalVisible(false); setScanned(false); }}>
-                <Text style={styles.cancelBtnText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.verifyBtn} onPress={verifyWithBackend}>
-                <Text style={styles.verifyBtnText}>Verify</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={styles.closeBtn}
+              onPress={() => { setModalVisible(false); setSchemeId(''); setResultData(null); }}
+            >
+              <Text style={styles.closeBtnText}>Close</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -114,34 +117,39 @@ const QRCodeScannerScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { padding: 20, alignItems: 'center' },
-  headerTitle: { fontSize: 18, fontWeight: 'bold' },
-  headerSub: { fontSize: 13, marginTop: 5, textAlign: 'center' },
-  cameraContainer: { flex: 1, margin: 15, borderRadius: 15, overflow: 'hidden' },
-  camera: { flex: 1 },
-  overlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center' },
-  scanArea: { width: 250, height: 250, position: 'relative' },
-  corner: { position: 'absolute', width: 40, height: 40, borderColor: '#3498db' },
-  topLeft: { top: 0, left: 0, borderTopWidth: 4, borderLeftWidth: 4 },
-  topRight: { top: 0, right: 0, borderTopWidth: 4, borderRightWidth: 4 },
-  bottomLeft: { bottom: 0, left: 0, borderBottomWidth: 4, borderLeftWidth: 4 },
-  bottomRight: { bottom: 0, right: 0, borderBottomWidth: 4, borderRightWidth: 4 },
-  instructions: { margin: 15, padding: 15, borderRadius: 10 },
-  instructionTitle: { fontSize: 14, fontWeight: 'bold', marginBottom: 8 },
-  instructionText: { fontSize: 13, marginBottom: 4 },
-  galleryBtn: { backgroundColor: '#3498db', marginHorizontal: 15, marginBottom: 30, padding: 15, borderRadius: 10, alignItems: 'center' },
-  galleryBtnText: { color: '#fff', fontSize: 15, fontWeight: 'bold' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
-  modalContent: { borderRadius: 15, padding: 20 },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 15, textAlign: 'center' },
-  resultBox: { backgroundColor: '#f8f9fa', padding: 15, borderRadius: 10, marginBottom: 15 },
-  resultLabel: { fontSize: 11, marginBottom: 2 },
-  resultValue: { fontSize: 15, fontWeight: 'bold', marginBottom: 10 },
-  modalBtns: { flexDirection: 'row', gap: 10 },
-  cancelBtn: { flex: 1, padding: 12, borderRadius: 8, backgroundColor: '#95a5a6', alignItems: 'center' },
-  cancelBtnText: { color: '#fff', fontWeight: 'bold' },
-  verifyBtn: { flex: 1, padding: 12, borderRadius: 8, backgroundColor: '#27ae60', alignItems: 'center' },
-  verifyBtnText: { color: '#fff', fontWeight: 'bold' },
+  header: { padding: 25, alignItems: 'center', margin: 15, borderRadius: 15 },
+  headerIcon: { fontSize: 48, marginBottom: 10 },
+  headerTitle: { fontSize: 18, fontWeight: 'bold', textAlign: 'center' },
+  headerSub: { fontSize: 13, marginTop: 6, textAlign: 'center', lineHeight: 18 },
+  inputSection: { margin: 15, padding: 20, borderRadius: 15 },
+  label: { fontSize: 14, fontWeight: '700', marginBottom: 8 },
+  input: {
+    borderWidth: 1, borderRadius: 10, padding: 14,
+    fontSize: 15, marginBottom: 14,
+  },
+  verifyBtn: {
+    backgroundColor: '#27ae60', borderRadius: 10,
+    padding: 16, alignItems: 'center',
+  },
+  verifyBtnDisabled: { opacity: 0.6 },
+  verifyBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  infoBox: { margin: 15, padding: 18, borderRadius: 15 },
+  infoTitle: { fontSize: 14, fontWeight: 'bold', marginBottom: 10 },
+  infoText: { fontSize: 13, marginBottom: 5, lineHeight: 18 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 25 },
+  modalContent: { borderRadius: 20, padding: 25, alignItems: 'center' },
+  verifiedBadge: {
+    width: 70, height: 70, borderRadius: 35,
+    backgroundColor: '#27ae60', justifyContent: 'center',
+    alignItems: 'center', marginBottom: 15,
+  },
+  verifiedIcon: { fontSize: 36, color: '#fff', fontWeight: 'bold' },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15 },
+  resultBox: { width: '100%', borderRadius: 12, padding: 15, marginBottom: 20 },
+  resultLabel: { fontSize: 11, marginBottom: 2, marginTop: 8 },
+  resultValue: { fontSize: 16, fontWeight: 'bold' },
+  closeBtn: { backgroundColor: '#3498db', borderRadius: 10, paddingHorizontal: 40, paddingVertical: 14 },
+  closeBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
 });
 
 export default QRCodeScannerScreen;

@@ -1,21 +1,19 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LogBox } from 'react-native';
+import { LogBox, Platform } from 'react-native';
 
 LogBox.ignoreLogs(['Non-serializable values were found in the navigation state']);
 
 // ─────────────────────────────────────────────────────────────
-//  BACKEND URL CONFIGURATION
-//  After deploying to Render, paste your URL below and set
-//  IS_PRODUCTION = true
+//  BACKEND URL — single source of truth
+//  Update this URL whenever your backend deployment changes.
 // ─────────────────────────────────────────────────────────────
-const IS_PRODUCTION = true; // ← Production mode ON
-
-const PRODUCTION_URL = 'https://panchayat-t1ui.onrender.com'; // ← Your Render URL
-const DEV_URL        = 'http://localhost:5000';                // ← Local backend server
-
-export const BACKEND_URL = IS_PRODUCTION ? PRODUCTION_URL : DEV_URL;
-
+// For local development: choose a host that works for your environment.
+// - On Android emulators use `10.0.2.2` (maps to host localhost)
+// - On iOS simulators or running on the same machine use `localhost`
+export const BACKEND_URL = __DEV__
+  ? (Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000')
+  : 'https://panchayat-t1ui.onrender.com';
 // ─────────────────────────────────────────────────────────────
 
 const api = axios.create({
@@ -40,9 +38,18 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API Error:', error);
+    
     if (error.code === 'ECONNABORTED') {
       error.message = 'Connection timeout. Please check your network.';
+    } else if (error.code === 'ECONNREFUSED') {
+      error.message = 'Cannot connect to server. Please check if the backend is running.';
+    } else if (error.code === 'NETWORK_ERROR') {
+      error.message = 'Network error. Please check your internet connection.';
+    } else if (!error.response) {
+      error.message = 'Network error. Please check your connection and try again.';
     }
+    
     if (error.response?.status === 401) {
       // Auto-clear stale session
       AsyncStorage.multiRemove(['token', 'user']).catch(() => {});

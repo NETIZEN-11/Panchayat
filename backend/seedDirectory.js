@@ -7,7 +7,7 @@ dotenv.config();
 
 const seedDirectory = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/smartpanchayat');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/smartpanchayat');
     console.log('Connected to MongoDB');
 
     // Clear existing directory entries

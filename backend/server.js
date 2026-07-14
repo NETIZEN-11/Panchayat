@@ -6,6 +6,8 @@ const path = require('path');
 const cron = require('node-cron');
 const connectDB = require('./src/config/database');
 const errorHandler = require('./src/middleware/errorHandler');
+const securityHeaders = require('./src/middleware/security');
+const rateLimiter = require('./src/middleware/rateLimiter');
 const { initializeFirebase } = require('./src/utils/fcm');
 const { initSocketIO } = require('./src/utils/socket');
 
@@ -30,6 +32,12 @@ app.use(cors({
   },
   credentials: true,
 }));
+
+// ─── Security Headers ─────────────────────────────────────────
+app.use(securityHeaders);
+
+// ─── Rate Limiter (global) ────────────────────────────────────
+app.use(rateLimiter({ windowMs: 15 * 60 * 1000, maxRequests: 100 }));
 
 // ─── Body Parsers ─────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
